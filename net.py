@@ -22,7 +22,7 @@ def startNet():
     port = 80
 
     # 创建 HTTP 服务器，使用 SimpleRequestHandler 处理请求
-    server = HTTPServer(('localhost', port), SimpleRequestHandler)
+    server = HTTPServer(('0.0.0.0', port), SimpleRequestHandler)
     print(f'Starting server on port {port}...')
 
     try:
