@@ -1,16 +1,14 @@
 import argparse
-import traceback
 import asyncio
-import google.generativeai as genai
 import re
+import traceback
+
+import google.generativeai as genai
 import telebot
 from telebot.async_telebot import AsyncTeleBot
-from pathlib import Path
-from telebot import TeleBot
-from telebot.types import BotCommand, Message
+from telebot.types import Message
 
 from net import startNet
-
 
 generation_config = {
     "temperature": 0.1,
@@ -20,6 +18,7 @@ generation_config = {
 }
 
 safety_settings = []
+
 
 def find_all_index(str, pattern):
     index_list = [0]
@@ -38,10 +37,10 @@ def replace_all(text, pattern, function):
     originstr = []
     poslist = find_all_index(text, pattern)
     for i in range(1, len(poslist[:-1]), 2):
-        start, end = poslist[i : i + 2]
+        start, end = poslist[i: i + 2]
         strlist.append(function(text[start:end]))
     for i in range(0, len(poslist), 2):
-        j, k = poslist[i : i + 2]
+        j, k = poslist[i: i + 2]
         originstr.append(text[j:k])
     if len(strlist) < len(originstr):
         strlist.append("")
@@ -49,6 +48,7 @@ def replace_all(text, pattern, function):
         originstr.append("")
     new_list = [item for pair in zip(originstr, strlist) for item in pair]
     return "".join(new_list)
+
 
 def escapeshape(text):
     return "▎*" + text.split()[1] + "*"
@@ -64,6 +64,7 @@ def escapebackquote(text):
 
 def escapeplus(text):
     return "\\" + text
+
 
 def escape(text, flag=0):
     # In all other places characters
@@ -116,6 +117,7 @@ def escape(text, flag=0):
     text = re.sub(r"!", "\!", text)
     return text
 
+
 async def make_new_gemini_convo():
     model = genai.GenerativeModel(
         model_name="gemini-pro",
@@ -124,6 +126,7 @@ async def make_new_gemini_convo():
     )
     convo = model.start_chat()
     return convo
+
 
 async def main():
     # Init args
@@ -152,7 +155,7 @@ async def main():
     @bot.message_handler(commands=["start"])
     async def gemini_handler(message: Message):
         try:
-            await bot.reply_to( message , escape("欢迎使用机器人,现在你可以向我提问.例如:`请写一个链表结构。`"), parse_mode="MarkdownV2")
+            await bot.reply_to(message, escape("欢迎使用机器人,现在你可以向我提问.例如:`请写一个链表结构。`"), parse_mode="MarkdownV2")
         except IndexError:
             await bot.reply_to(message, "看起来出了一些问题,请尝试更改你的提示词或联系管理员")
 
@@ -160,12 +163,12 @@ async def main():
     async def gemini_handler(message: Message):
 
         if message.chat.type == "private":
-            await bot.reply_to( message , "与机器人私聊无需此命令")
+            await bot.reply_to(message, "与机器人私聊无需此命令")
             return
         try:
             m = message.text.strip().split(maxsplit=1)[1].strip()
         except IndexError:
-            await bot.reply_to( message , escape("请在/gemini后接上你要说的话.例如:`/gemini 请写一个链表结构。`"), parse_mode="MarkdownV2")
+            await bot.reply_to(message, escape("请在/gemini后接上你要说的话.例如:`/gemini 请写一个链表结构。`"), parse_mode="MarkdownV2")
             return
         player = None
         # restart will lose all TODO
@@ -179,7 +182,7 @@ async def main():
         try:
             player.send_message(m)
             try:
-                await bot.reply_to( message , escape(player.last.text) , parse_mode="MarkdownV2",)
+                await bot.reply_to(message, escape(player.last.text), parse_mode="MarkdownV2", )
             except:
                 await bot.reply_to(message, escape(player.last.text))
 
@@ -195,11 +198,11 @@ async def main():
             await bot.reply_to(message, "您的历史记录已清理")
         else:
             await bot.reply_to(message, "您现在没有历史记录")
-    
+
     @bot.message_handler(func=lambda message: message.chat.type == "private", content_types=['text'])
     async def gemini_private_handler(message: Message):
         m = message.text.strip()
-        player = None 
+        player = None
         # Check if the player is already in gemini_player_dict.
         if str(message.from_user.id) not in gemini_player_dict:
             player = await make_new_gemini_convo()
@@ -219,7 +222,7 @@ async def main():
         except Exception as e:
             traceback.print_exc()
             await bot.reply_to(message, "看起来出了一些问题,请尝试更改你的提示词或联系管理员")
-            
+
     @bot.message_handler(content_types=["photo"])
     async def gemini_photo_handler(message: Message) -> None:
         if message.chat.type != "private":
@@ -262,12 +265,12 @@ async def main():
             except Exception as e:
                 traceback.print_exc()
                 await bot.reply_to(message, "看起来出了一些问题,请尝试更改你的提示词或联系管理员")
-                
+
     # Start bot
     print("Starting Gemini_Telegram_Bot.")
     await bot.polling(none_stop=True)
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
     startNet()
+    asyncio.run(main())

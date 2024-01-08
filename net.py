@@ -19,7 +19,7 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
 
 def startNet():
     # 指定监听的端口
-    port = 80
+    port = 8080
 
     # 创建 HTTP 服务器，使用 SimpleRequestHandler 处理请求
     server = HTTPServer(('0.0.0.0', port), SimpleRequestHandler)
