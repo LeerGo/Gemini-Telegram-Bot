@@ -9,6 +9,8 @@ from pathlib import Path
 from telebot import TeleBot
 from telebot.types import BotCommand, Message
 
+from net import startNet
+
 
 generation_config = {
     "temperature": 0.1,
@@ -268,3 +270,4 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+    startNet()
