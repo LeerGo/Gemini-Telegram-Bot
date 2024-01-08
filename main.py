@@ -150,6 +150,7 @@ async def main():
         ],
     )
     print("Bot init done.")
+    startNet()
 
     # Init commands
     @bot.message_handler(commands=["start"])
@@ -272,5 +273,4 @@ async def main():
 
 
 if __name__ == '__main__':
-    startNet()
     asyncio.run(main())
